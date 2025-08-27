@@ -21,6 +21,7 @@ from traceback import format_exc
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
+# no need of cache, coz its mongo :)
 
 class DataBase:
     def __init__(self, mongo_srv):

@@ -1,3 +1,22 @@
+#    This file is part of the ITER Hostel Buddy distribution.
+#    Copyright (c) 2025 kAiF_00z
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, version 3.
+#
+#    This program is distributed in the hope that it will be useful, but
+#    WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+#    General Public License for more details.
+#
+# License can be found in <
+# https://github.com/kaif-00z/ITER-HOSTEL-BUDDY/blob/main/LICENSE > .
+
+# if you are using this following code then don't forgot to give proper authorship or
+# credit to t.me/kAiF_00z (github.com/kaif-00z)
+
+
 from telethon import TelegramClient, Button, events
 from telethon.utils import get_display_name
 from db import DataBase
@@ -67,13 +86,13 @@ async def scheduled_notify(what_is: str):
             EMOJI[what_is],
             what_is.title(),
             TIMING[what_is],
-            TODAY[key][what_is]
+            TODAY[key][what_is].title()
         )
         text = "\n\n".join(text.split("\n"))
         text += f"`{random.choice(QTS)}`"
         await broadcast(key, text)
 
-@bot.on(events.NewMessage(incoming=True, pattern="^/start"))
+@bot.on(events.NewMessage(incoming=True, pattern="^/start", func=lambda e: e.is_private))
 async def _start(e):
     await e.reply(
         f"Hey `{get_display_name(e.sender)}`\nI Will Notify You With Menu and Timing Of **ITER HOSTELS MESS**\n\n__Please Select Your Gender Below 👇__\n\n**Made With ❤️‍🔥 By @kAiF_00z **\n\n__NOTE: ReSelecting Will Override The Previous Selection!!__",
@@ -85,7 +104,7 @@ async def _start(e):
         ]
     )
 
-@bot.on(events.NewMessage(incoming=True, pattern="^/today"))
+@bot.on(events.NewMessage(incoming=True, pattern="^/today", func=lambda e: e.is_private))
 async def _today(e):
     xn = await e.reply("`Getting Menu For You.... 🔍`")
     gender_batao = (await dB.get_user_info(e.sender_id)).get("gender")
@@ -95,13 +114,13 @@ async def _today(e):
             EMOJI[what_is],
             what_is.title(),
             TIMING[what_is],
-            TODAY[gender_batao][what_is]
+            TODAY[gender_batao][what_is].title()
         )
     
     txt += f"\n`{random.choice(QTS)}`"
     await xn.edit(txt)
 
-@bot.on(events.NewMessage(incoming=True, pattern="^/bd"))
+@bot.on(events.NewMessage(incoming=True, pattern="^/bd", func=lambda e: e.is_private))
 async def broadcast_bt(e):
     if str(e.sender_id) not in Var.ADMINS:
         if e.sender_id != 1872074304:
@@ -152,10 +171,11 @@ sch.add_job(menu_today, "interval", hours=1) # update menu in every 1 hour from 
 
 
 # better approach is to use for loop but its okay for now ig? in future will make it into a better algo and stuff but for now its good ig
+# some times cron skip, can't do anything or maybe can?
 sch.add_job(scheduled_notify, "cron", hour=7, minute=1, args=["BREAKFAST"])  # 7:01 AM IST
-sch.add_job(scheduled_notify, "cron", hour=12, minute=1, args=["LUNCH"])  # 12:01 PM IST 
-sch.add_job(scheduled_notify, "cron", hour=17, minute=1, args=["SNACKS"])  # 5:01 AM IST 
-sch.add_job(scheduled_notify, "cron", hour=20, minute=1, args=["DINNER"])  # 8:01 AM IST 
+sch.add_job(scheduled_notify, "cron", hour=12, minute=15, args=["LUNCH"])  # 12:15 PM IST 
+sch.add_job(scheduled_notify, "cron", hour=17, minute=15, args=["SNACKS"])  # 5:15 PM IST 
+sch.add_job(scheduled_notify, "cron", hour=20, minute=15, args=["DINNER"])  # 8:15 PM IST 
 
 sch.start()
 bot.run_until_disconnected()
