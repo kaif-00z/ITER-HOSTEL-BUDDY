@@ -1,0 +1,5 @@
+telethon
+aiofiles
+apscheduler==3.10.1
+python-decouple
+motor[srv]==3.7.1
