@@ -1,0 +1,49 @@
+#    This file is part of the AutoAnime distribution.
+#    Copyright (c) 2025 kAiF_00z
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, version 3.
+#
+#    This program is distributed in the hope that it will be useful, but
+#    WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+#    General Public License for more details.
+#
+# License can be found in <
+# https://github.com/kaif-00z/AutoAnimeBot/blob/main/LICENSE > .
+
+# if you are using this following code then don't forgot to give proper
+# credit to t.me/kAiF_00z (github.com/kaif-00z)
+
+import sys
+from traceback import format_exc
+
+from motor.motor_asyncio import AsyncIOMotorClient
+
+
+class DataBase:
+    def __init__(self, mongo_srv):
+        try:
+            print("Trying To Connect With MongoDB")
+            self.client = AsyncIOMotorClient(
+                mongo_srv,
+                tls=False
+            )
+            self.user_info_db = self.client["ITER"]["userInfo"]
+            print("Successfully Connected With MongoDB")
+        except Exception as error:
+            print(format_exc())
+            print(str(error))
+            sys.exit(1)
+    
+    async def add_broadcast_user(self, user_id, gender):
+        await self.user_info_db.update_one({"_id": user_id}, {"$set": {"gender": gender}}, upsert=True)
+
+    async def get_user_info(self, user_id):
+        data = self.user_info_db.find({"_id": user_id})
+        return data or {}
+
+    async def get_broadcast_user(self, gender):
+        data = self.user_info_db.find({"gender": gender})
+        return [i["_id"] for i in (await data.to_list(length=None))]
