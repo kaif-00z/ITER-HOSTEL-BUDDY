@@ -3,12 +3,7 @@ TXT = """
 **🍜** __{}__
 """
 
-EMOJI= {
-    "BREAKFAST": "🥛",
-    "LUNCH": "🍚",
-    "SNACKS": "🍟",
-    "DINNER": "🍽️"
-}
+EMOJI = {"BREAKFAST": "🥛", "LUNCH": "🍚", "SNACKS": "🍟", "DINNER": "🍽️"}
 
 QTS = [
     "Don't just eat to fill your stomach. Eat something nutritious, buddy! 🍎🥦",
@@ -26,5 +21,5 @@ QTS = [
     "Your parents are your ultimate backup. A quick call can solve a bad day AND a bad meal. ☎️✨",
     "I know the mess food gets repetitive, buddy. Just remember, mom asks every day if you're eating right! 🥲❤️",
     "Eat your meals on time, not just for your health, but so your parents don't worry from afar. ⏰🇮🇳",
-    "Your parents' biggest prayer: 'Bhagwan, meri baccha thik se khaana kha le.' Don't make a lie out of their prayer, buddy! 🙏🍲"
+    "Your parents' biggest prayer: 'Bhagwan, meri baccha thik se khaana kha le.' Don't make a lie out of their prayer, buddy! 🙏🍲",
 ]

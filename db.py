@@ -23,28 +23,33 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 # no need of cache, coz its mongo :)
 
+
 class DataBase:
     def __init__(self, mongo_srv):
         try:
             print("Trying To Connect With MongoDB")
-            self.client = AsyncIOMotorClient(
-                mongo_srv
-            )
+            self.client = AsyncIOMotorClient(mongo_srv)
             self.user_info_db = self.client["ITER"]["userInfo"]
             print("Successfully Connected With MongoDB")
         except Exception as error:
             print(format_exc())
             print(str(error))
             sys.exit(1)
-    
+
     async def add_broadcast_user(self, user_id, gender):
         # don't ask why not using insert_one, get some brain bro
-        await self.user_info_db.update_one({"_id": user_id}, {"$set": {"gender": gender}}, upsert=True)
+        await self.user_info_db.update_one(
+            {"_id": user_id}, {"$set": {"gender": gender}}, upsert=True
+        )
 
     async def get_user_info(self, user_id):
         data = await self.user_info_db.find_one({"_id": user_id})
         return data or {}
 
     async def get_broadcast_user(self, gender=None):
-        data = self.user_info_db.find({"gender": gender}) if gender else self.user_info_db.find()
+        data = (
+            self.user_info_db.find({"gender": gender})
+            if gender
+            else self.user_info_db.find()
+        )
         return [i["_id"] for i in (await data.to_list(length=None))]
