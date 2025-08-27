@@ -27,8 +27,7 @@ class DataBase:
         try:
             print("Trying To Connect With MongoDB")
             self.client = AsyncIOMotorClient(
-                mongo_srv,
-                tls=False
+                mongo_srv
             )
             self.user_info_db = self.client["ITER"]["userInfo"]
             print("Successfully Connected With MongoDB")
@@ -38,10 +37,11 @@ class DataBase:
             sys.exit(1)
     
     async def add_broadcast_user(self, user_id, gender):
+        # don't ask why not using insert_one, get some brain bro
         await self.user_info_db.update_one({"_id": user_id}, {"$set": {"gender": gender}}, upsert=True)
 
     async def get_user_info(self, user_id):
-        data = self.user_info_db.find({"_id": user_id})
+        data = await self.user_info_db.find_one({"_id": user_id})
         return data or {}
 
     async def get_broadcast_user(self, gender):
