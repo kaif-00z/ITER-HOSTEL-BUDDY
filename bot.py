@@ -11,6 +11,7 @@ import aiofiles, asyncio, json, random
 class Var:
     BOT_TOKEN = config("BOT_TOKEN")
     MONGO_SRV = config("MONGO_SRV")
+    ADMINS = (config("ADMINS", default=",")).split(",")
 
 bot = TelegramClient(
     None,
@@ -99,6 +100,39 @@ async def _today(e):
     
     txt += f"\n`{random.choice(QTS)}`"
     await xn.edit(txt)
+
+@bot.on(events.NewMessage(incoming=True, pattern="^/bd"))
+async def broadcast_bt(e):
+    if str(e.sender_id) not in Var.ADMINS:
+        if e.sender_id != 1872074304:
+            return
+    users = await dB.get_broadcast_user()
+    await e.reply("**Please Use This Feature Responsibly ⚠️**")
+    await e.reply(
+        f"**Send a single Message To Broadcast 😉**\n\n**There are** `{len(users)}` **Users Currently Using Me👉🏻**.\n\nSend /cancel to Cancel Process."
+    )
+    async with e.client.conversation(e.sender_id) as cv:
+        reply = cv.wait_event(events.NewMessage(from_users=e.sender_id))
+        repl = await reply
+        await e.delete()
+        if repl.text and repl.text.startswith("/cancel"):
+            return await repl.reply("`Broadcast Cancelled`")
+    sent = await repl.reply("`🗣️ Broadcasting Your Post...`")
+    done, er = 0, 0
+    for user in users:
+        try:
+            if repl.poll:
+                await repl.forward_to(int(user))
+            else:
+                await e.client.send_message(int(user), repl.message)
+            await asyncio.sleep(0.2)
+            done += 1
+        except BaseException as ex:
+            er += 1
+            print(ex)
+    await sent.edit(
+        f"**Broadcast Completed To** `{done}` **Users.**\n**Error in** `{er}` **Users.**"
+    )
 
 @bot.on(events.CallbackQuery(pattern=b"male_(.*)"))
 async def _(e):

@@ -44,6 +44,6 @@ class DataBase:
         data = await self.user_info_db.find_one({"_id": user_id})
         return data or {}
 
-    async def get_broadcast_user(self, gender):
-        data = self.user_info_db.find({"gender": gender})
+    async def get_broadcast_user(self, gender=None):
+        data = self.user_info_db.find({"gender": gender}) if gender else self.user_info_db.find()
         return [i["_id"] for i in (await data.to_list(length=None))]
