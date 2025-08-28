@@ -20,10 +20,10 @@
 import asyncio
 import json
 import random
-import pytz
 from datetime import datetime
 
 import aiofiles
+import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from decouple import config
 from telethon import Button, TelegramClient, events
@@ -74,9 +74,7 @@ async def menu_today():  # no need of async, just i am too lazy to create one mo
         DATA.keys()
     ):  # better to copy the orginial DATA var as if we change something in loop it will give error, but here we aren't modifying anything , ye boiiiii
         dt = datetime.now(pytz.timezone("Asia/Kolkata"))
-        TODAY[key] = DATA[key]["weeks"][(dt.day // 7) - 1]["days"][
-            dt.now().weekday()
-        ]
+        TODAY[key] = DATA[key]["weeks"][(dt.day // 7) - 1]["days"][dt.now().weekday()]
         print(f"Updated Menu For {key} at {dt}!!")
 
 
@@ -127,7 +125,9 @@ async def _start(e):
 async def _today(e):
     xn = await e.reply("`Getting Menu For You.... 🔍`")
     gender_batao = (await dB.get_user_info(e.sender_id)).get("gender")
-    txt = f"**📋 Today Menu & Timing ⏰** __({datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%d/%m/%Y')})__\n"
+    txt = f"**📋 Today Menu & Timing ⏰** __({
+        datetime.now(
+            pytz.timezone('Asia/Kolkata')).strftime('%d/%m/%Y')})__\n"
     for what_is in TODAY[gender_batao].keys():
         txt += TXT.format(
             EMOJI[what_is],
@@ -195,7 +195,11 @@ sch.add_job(menu_today, "interval", hours=1)
 # some times cron skip, can't do anything or maybe can?
 for ping in TIMING:
     sch.add_job(
-        scheduled_notify, "cron", hour=TIMING[ping][1][0], minute=TIMING[ping][1][1], args=[ping]
+        scheduled_notify,
+        "cron",
+        hour=TIMING[ping][1][0],
+        minute=TIMING[ping][1][1],
+        args=[ping],
     )
 
 sch.start()
