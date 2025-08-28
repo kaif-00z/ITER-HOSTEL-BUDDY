@@ -20,6 +20,7 @@
 import asyncio
 import json
 import random
+import pytz
 from datetime import datetime
 
 import aiofiles
@@ -72,9 +73,11 @@ async def menu_today():  # no need of async, just i am too lazy to create one mo
     ) in (
         DATA.keys()
     ):  # better to copy the orginial DATA var as if we change something in loop it will give error, but here we aren't modifying anything , ye boiiiii
-        TODAY[key] = DATA[key]["weeks"][(datetime.now().day // 7)]["days"][
-            datetime.now().weekday()
+        dt = datetime.now(pytz.timezone("Asia/Kolkata"))
+        TODAY[key] = DATA[key]["weeks"][(dt.day // 7) - 1]["days"][
+            dt.now().weekday()
         ]
+        print(f"Updated Menu For {key} at {dt}!!")
 
 
 bot.loop.run_until_complete(start_bot())
@@ -95,7 +98,7 @@ async def scheduled_notify(what_is: str):
         text = TXT.format(
             EMOJI[what_is],
             what_is.title(),
-            TIMING[what_is],
+            TIMING[what_is][0],
             TODAY[key][what_is].title(),
         )
         text = "\n\n".join(text.split("\n"))
@@ -108,7 +111,7 @@ async def scheduled_notify(what_is: str):
 )
 async def _start(e):
     await e.reply(
-        f"Hey `{get_display_name(e.sender)}`\nI Will Notify You With Menu and Timing Of **ITER HOSTELS MESS**\n\n__Please Select Your Gender Below 👇__\n\n**Made With ❤️‍🔥 By @kAiF_00z **\n\n__NOTE: ReSelecting Will Override The Previous Selection!!__",
+        f"Hey `{get_display_name(e.sender)}`\nI Will Notify You With Menu and Timing Of **ITER HOSTELS MESS**\n\n__Please Select Your Gender Below 👇__\n\n__NOTE: ReSelecting Will Override The Previous Selection!!\n\n__**Made With ❤️‍🔥 By @kAiF_00z **",
         buttons=[
             [
                 Button.inline("👨 BOYS HOSTEL", data=f"male_{e.sender_id}"),
@@ -124,12 +127,12 @@ async def _start(e):
 async def _today(e):
     xn = await e.reply("`Getting Menu For You.... 🔍`")
     gender_batao = (await dB.get_user_info(e.sender_id)).get("gender")
-    txt = "**📋 Todays Menu & Timing ⏰**\n"
+    txt = f"**📋 Today Menu & Timing ⏰** __({datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%d/%m/%Y')})__\n"
     for what_is in TODAY[gender_batao].keys():
         txt += TXT.format(
             EMOJI[what_is],
             what_is.title(),
-            TIMING[what_is],
+            TIMING[what_is][0],
             TODAY[gender_batao][what_is].title(),
         )
 
@@ -150,7 +153,6 @@ async def broadcast_bt(e):
     async with e.client.conversation(e.sender_id) as cv:
         reply = cv.wait_event(events.NewMessage(from_users=e.sender_id))
         repl = await reply
-        await e.delete()
         if repl.text and repl.text.startswith("/cancel"):
             return await repl.reply("`Broadcast Cancelled`")
     sent = await repl.reply("`🗣️ Broadcasting Your Post...`")
@@ -190,21 +192,11 @@ async def _(e):
 # update menu in every 1 hour from static file (can use cron but lets see)
 sch.add_job(menu_today, "interval", hours=1)
 
-
-# better approach is to use for loop but its okay for now ig? in future will make it into a better algo and stuff but for now its good ig
 # some times cron skip, can't do anything or maybe can?
-sch.add_job(
-    scheduled_notify, "cron", hour=7, minute=1, args=["BREAKFAST"]
-)  # 7:01 AM IST
-sch.add_job(
-    scheduled_notify, "cron", hour=12, minute=15, args=["LUNCH"]
-)  # 12:15 PM IST
-sch.add_job(
-    scheduled_notify, "cron", hour=17, minute=15, args=["SNACKS"]
-)  # 5:15 PM IST
-sch.add_job(
-    scheduled_notify, "cron", hour=20, minute=15, args=["DINNER"]
-)  # 8:15 PM IST
+for ping in TIMING:
+    sch.add_job(
+        scheduled_notify, "cron", hour=TIMING[ping][1][0], minute=TIMING[ping][1][1], args=[ping]
+    )
 
 sch.start()
 bot.run_until_disconnected()
