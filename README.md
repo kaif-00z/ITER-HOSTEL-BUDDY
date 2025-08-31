@@ -11,5 +11,5 @@ A Bot Which Notify With Menu, Timings & Reminders
 [![License](https://img.shields.io/badge/license-GPLv3-blue)](https://github.com/kaif-00z/ITER-HOSTEL-BUDDY/blob/main/LICENSE)
 
 ### Credits
-- [Mohd-FaiZ-Jr](github.com/Mohd-FaiZ-Jr) For Static Menu In JSON Format (authorship already given)
-- [Me](gihtub.com/kaif-00z) For Auditing & Fixing The JSON & Making This Bot..
+- [Mohd-FaiZ-Jr](https://github.com/Mohd-FaiZ-Jr) For Static Menu In JSON Format (authorship already given)
+- [Me](https://gihtub.com/kaif-00z) For Auditing & Fixing The JSON & Making This Bot..
