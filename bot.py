@@ -20,10 +20,10 @@
 import asyncio
 import json
 import random
-import pytz
 from datetime import datetime, timedelta
 
 import aiofiles
+import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from decouple import config
 from telethon import Button, TelegramClient, events
@@ -52,6 +52,8 @@ DATA = {"BOYS": {}, "GIRLS": {}}
 
 # ahh, no need of try , except cause program will crash in startup if
 # something went wrong...
+
+
 async def start_bot() -> None:
 
     # too lazy to warp it into a function so emjoy
@@ -68,16 +70,18 @@ async def start_bot() -> None:
 
 
 def menu_today(tmrw=None):
-    data = {"BOYS": {}, "GIRLS": {}} 
+    data = {"BOYS": {}, "GIRLS": {}}
     for (
         key
     ) in (
         DATA.keys()
     ):  # better to copy the orginial DATA var as if we change something in loop it will give error, but here we aren't modifying anything , ye boiiiii
-        dt = datetime.now(pytz.timezone("Asia/Kolkata")) + timedelta(days=1) if tmrw else datetime.now(pytz.timezone("Asia/Kolkata"))
-        data[key] = DATA[key]["weeks"][(dt.isocalendar()[1]) % 4]["days"][
-            dt.weekday()
-        ]
+        dt = (
+            datetime.now(pytz.timezone("Asia/Kolkata")) + timedelta(days=1)
+            if tmrw
+            else datetime.now(pytz.timezone("Asia/Kolkata"))
+        )
+        data[key] = DATA[key]["weeks"][(dt.isocalendar()[1]) % 4]["days"][dt.weekday()]
     return data
 
 
@@ -95,7 +99,7 @@ async def broadcast(gen, txt):
 
 
 async def scheduled_notify(what_is: str):
-    TODAY = menu_today() # to make sure that we have latest menu
+    TODAY = menu_today()  # to make sure that we have latest menu
     for key in TODAY.keys():
         text = TXT.format(
             EMOJI[what_is],
@@ -128,9 +132,11 @@ async def _start(e):
 )
 async def _today(e):
     xn = await e.reply("`Getting Menu For You.... 🔍`")
-    TODAY = menu_today() # to make sure that we have latest menu
+    TODAY = menu_today()  # to make sure that we have latest menu
     gender_batao = (await dB.get_user_info(e.sender_id)).get("gender")
-    txt = f"**📋 Today Menu & Timing ⏰** __({datetime.now(pytz.timezone('Asia/Kolkata')).strftime('%d/%m/%Y')})__\n"
+    txt = f"**📋 Today Menu & Timing ⏰** __({
+        datetime.now(
+            pytz.timezone('Asia/Kolkata')).strftime('%d/%m/%Y')})__\n"
     for what_is in TODAY[gender_batao].keys():
         txt += TXT.format(
             EMOJI[what_is],
@@ -143,14 +149,17 @@ async def _today(e):
     await xn.edit(txt)
 
 
-@bot.on(
-    events.NewMessage(incoming=True, pattern="^/tmrw", func=lambda e: e.is_private)
-)
+@bot.on(events.NewMessage(incoming=True, pattern="^/tmrw", func=lambda e: e.is_private))
 async def _tmrw(e):
     xn = await e.reply("`Getting Menu For You.... 🔍`")
-    TMRW = menu_today(tmrw=True) 
+    TMRW = menu_today(tmrw=True)
     gender_batao = (await dB.get_user_info(e.sender_id)).get("gender")
-    txt = f"**📋 Tomorrow Menu & Timing ⏰** __({(datetime.now(pytz.timezone('Asia/Kolkata')) + timedelta(days=1)).strftime('%d/%m/%Y')})__\n"
+    txt = f"**📋 Tomorrow Menu & Timing ⏰** __({
+        (
+            datetime.now(
+                pytz.timezone('Asia/Kolkata')) +
+            timedelta(
+                days=1)).strftime('%d/%m/%Y')})__\n"
     for what_is in TMRW[gender_batao].keys():
         txt += TXT.format(
             EMOJI[what_is],
@@ -214,7 +223,11 @@ async def _(e):
 # some times cron skip, can't do anything or maybe we can?
 for ping in TIMING:
     sch.add_job(
-        scheduled_notify, "cron", hour=TIMING[ping][1][0], minute=TIMING[ping][1][1], args=[ping]
+        scheduled_notify,
+        "cron",
+        hour=TIMING[ping][1][0],
+        minute=TIMING[ping][1][1],
+        args=[ping],
     )
 
 sch.start()
