@@ -38,3 +38,16 @@ QTS = [
     "A hot chapati and some ghee can fix a lot more than hunger, champ! 🫓🧈",
     "Food made with love always tastes better. That’s why mom’s food is undefeated, legend! 🏆🍛",
 ]
+
+ABOUT = """
+**⏱ Uptime** : `{}`
+**💡Version** : `v0.0.1@4.09.dev`
+**👥 Users** : `{}`
+
+• **🐍 Python**: `{}`
+• **✈️ Telethon**: `{}`
+• **🍽️ Menu Version**: `{}`
+• **💻 Server**: `{}`
+
+~ **Developer**  __@kAiF_00z __
+"""

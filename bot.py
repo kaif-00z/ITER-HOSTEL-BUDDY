@@ -30,8 +30,9 @@ from telethon import Button, TelegramClient, events
 from telethon.utils import get_display_name
 
 from data.timing import TIMING
+from func import run_async, ts
 from db import DataBase
-from strings import EMOJI, QTS, TXT
+from strings import EMOJI, QTS, TXT, ABOUT
 
 
 class Var:
@@ -43,7 +44,7 @@ class Var:
 bot = TelegramClient(None, api_id=6, api_hash="eb06d4abfb49dc3eeb1aeb98ae0f581e")
 dB = DataBase(Var.MONGO_SRV)
 sch = AsyncIOScheduler(timezone="Asia/Kolkata")
-
+UPTIME = datetime.now(pytz.timezone("Asia/Kolkata"))
 
 # actually doesn't make any sense if deployed on restarting server (like heroku, koyeb, railway, etc)
 # but it make sense if its deployed on non restarting server
@@ -69,6 +70,7 @@ async def start_bot() -> None:
     print(f"@{bot.me.username} is Online Now.")
 
 
+@run_async # not just dummy async
 def menu_today(tmrw=None):
     data = {"BOYS": {}, "GIRLS": {}}
     for (
@@ -99,7 +101,7 @@ async def broadcast(gen, txt):
 
 
 async def scheduled_notify(what_is: str):
-    TODAY = menu_today()  # to make sure that we have latest menu
+    TODAY = await menu_today()  # to make sure that we have latest menu
     for key in TODAY.keys():
         text = TXT.format(
             EMOJI[what_is],
@@ -117,7 +119,7 @@ async def scheduled_notify(what_is: str):
 )
 async def _start(e):
     await e.reply(
-        f"Hey `{get_display_name(e.sender)}`\nI Will Notify You With Menu and Timing Of **ITER HOSTELS MESS**\n\n__Please Select Your Gender Below 👇__\n\n__NOTE: ReSelecting Will Override The Previous Selection!!\n\n__**Made With ❤️‍🔥 By @kAiF_00z **",
+        f"Hey `{get_display_name(e.sender)}`\nI Will Notify You With Menu and Timing Of **ITER HOSTELS MESS**\n\n__Please Select Your Gender Below 👇__\n\n__NOTE: ReSelecting Will Override The Previous Selection!!__",
         buttons=[
             [
                 Button.inline("👨 BOYS HOSTEL", data=f"male_{e.sender_id}"),
@@ -132,7 +134,7 @@ async def _start(e):
 )
 async def _today(e):
     xn = await e.reply("`Getting Menu For You.... 🔍`")
-    TODAY = menu_today()  # to make sure that we have latest menu
+    TODAY = await menu_today()  # to make sure that we have latest menu
     gender_batao = (await dB.get_user_info(e.sender_id)).get("gender")
     txt = f"**📋 Today Menu & Timing ⏰** __({
         datetime.now(
@@ -152,7 +154,7 @@ async def _today(e):
 @bot.on(events.NewMessage(incoming=True, pattern="^/tmrw", func=lambda e: e.is_private))
 async def _tmrw(e):
     xn = await e.reply("`Getting Menu For You.... 🔍`")
-    TMRW = menu_today(tmrw=True)
+    TMRW = await menu_today(tmrw=True)
     gender_batao = (await dB.get_user_info(e.sender_id)).get("gender")
     txt = f"**📋 Tomorrow Menu & Timing ⏰** __({
         (
@@ -170,6 +172,29 @@ async def _tmrw(e):
 
     txt += f"\n`{random.choice(QTS)}`"
     await xn.edit(txt)
+
+@bot.on(events.NewMessage(incoming=True, pattern="^/about"))
+async def _about(event):
+    from platform import python_version, release, system
+
+    from data import __version__ as menu_version
+    from telethon import __version__ as telethon_version
+
+    txt = ABOUT.format(
+        ts(int((datetime.now(pytz.timezone("Asia/Kolkata")) - UPTIME).seconds) * 1000),
+        len(await dB.get_broadcast_user()),
+        f"{python_version()}",
+        telethon_version,
+        menu_version,
+        f"{system()} {release()}"
+    )
+    return await event.reply(
+        txt,
+        buttons=[
+            [Button.url("🚀 Source Code", url="https://github.com/kaif-00z/ITER-HOSTEL-BUDDY")]
+        ],
+        link_preview=False,
+    )
 
 
 @bot.on(events.NewMessage(incoming=True, pattern="^/bd", func=lambda e: e.is_private))
