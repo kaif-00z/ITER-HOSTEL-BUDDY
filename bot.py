@@ -30,9 +30,9 @@ from telethon import Button, TelegramClient, events
 from telethon.utils import get_display_name
 
 from data.timing import TIMING
-from func import run_async, ts
 from db import DataBase
-from strings import EMOJI, QTS, TXT, ABOUT
+from func import run_async, ts
+from strings import ABOUT, EMOJI, QTS, TXT
 
 
 class Var:
@@ -70,7 +70,7 @@ async def start_bot() -> None:
     print(f"@{bot.me.username} is Online Now.")
 
 
-@run_async # not just dummy async
+@run_async  # not just dummy async
 def menu_today(tmrw=None):
     data = {"BOYS": {}, "GIRLS": {}}
     for (
@@ -173,12 +173,14 @@ async def _tmrw(e):
     txt += f"\n`{random.choice(QTS)}`"
     await xn.edit(txt)
 
+
 @bot.on(events.NewMessage(incoming=True, pattern="^/about"))
 async def _about(event):
     from platform import python_version, release, system
 
-    from data import __version__ as menu_version
     from telethon import __version__ as telethon_version
+
+    from data import __version__ as menu_version
 
     txt = ABOUT.format(
         ts(int((datetime.now(pytz.timezone("Asia/Kolkata")) - UPTIME).seconds) * 1000),
@@ -186,12 +188,17 @@ async def _about(event):
         f"{python_version()}",
         telethon_version,
         menu_version,
-        f"{system()} {release()}"
+        f"{system()} {release()}",
     )
     return await event.reply(
         txt,
         buttons=[
-            [Button.url("🚀 Source Code", url="https://github.com/kaif-00z/ITER-HOSTEL-BUDDY")]
+            [
+                Button.url(
+                    "🚀 Source Code",
+                    url="https://github.com/kaif-00z/ITER-HOSTEL-BUDDY",
+                )
+            ]
         ],
         link_preview=False,
     )

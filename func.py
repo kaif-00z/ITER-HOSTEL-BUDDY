@@ -1,6 +1,8 @@
-import asyncio, multiprocessing
+import asyncio
+import multiprocessing
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial, wraps
+
 
 def ts(milliseconds: int) -> str:
     seconds, milliseconds = divmod(int(milliseconds), 1000)
@@ -18,7 +20,10 @@ def ts(milliseconds: int) -> str:
 
     return tmp[:-1]
 
+
 # thanks to TeamUltroid/Ultroid for this
+
+
 def run_async(function):
     @wraps(function)
     async def wrapper(*args, **kwargs):
