@@ -21,7 +21,7 @@ from traceback import format_exc
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
-# no need of cache, coz its mongo :) 
+# no need of cache, coz its mongo :)
 # maybe cache will be added in future idk
 
 
@@ -40,7 +40,9 @@ class DataBase:
     async def add_broadcast_user(self, user_id, gender):
         # don't ask why not using insert_one, get some brain bro
         await self.user_info_db.update_one(
-            {"_id": user_id}, {"$set": {"gender": gender, "no_notify": False}}, upsert=True
+            {"_id": user_id},
+            {"$set": {"gender": gender, "no_notify": False}},
+            upsert=True,
         )
 
     async def get_user_info(self, user_id):

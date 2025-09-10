@@ -128,6 +128,7 @@ async def _start(e):
         ],
     )
 
+
 async def _tell_to_select_hostel(e, _id):
     await e.edit(
         f"__Sorry!__\n\n__You Haven't Selected Your Hostel Yet!__\n__Please Select Your Hostel First Then Use The Following Command!!__",
@@ -138,6 +139,7 @@ async def _tell_to_select_hostel(e, _id):
             ]
         ],
     )
+
 
 @bot.on(
     events.NewMessage(incoming=True, pattern="^/today", func=lambda e: e.is_private)
@@ -187,6 +189,7 @@ async def _tmrw(e):
         return await xn.edit(txt)
     return await _tell_to_select_hostel(xn, e.sender_id)
 
+
 @bot.on(events.NewMessage(incoming=True, pattern="^/stop", func=lambda e: e.is_private))
 async def _stop(e):
     xn = await e.reply("`Processing Your Request.... 🔍`")
@@ -196,6 +199,7 @@ async def _stop(e):
         await dB.no_notify(e.sender_id)
         return await xn.edit("`You Will No Longer Receive Menu Notifications! 😢`")
     return await xn.edit("`What You Want To Stop? Yourself? 🤡`")
+
 
 @bot.on(events.NewMessage(incoming=True, pattern="^/about"))
 async def _about(event):
