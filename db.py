@@ -21,7 +21,8 @@ from traceback import format_exc
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
-# no need of cache, coz its mongo :)
+# no need of cache, coz its mongo :) 
+# maybe cache will be added in future idk
 
 
 class DataBase:
@@ -39,17 +40,27 @@ class DataBase:
     async def add_broadcast_user(self, user_id, gender):
         # don't ask why not using insert_one, get some brain bro
         await self.user_info_db.update_one(
-            {"_id": user_id}, {"$set": {"gender": gender}}, upsert=True
+            {"_id": user_id}, {"$set": {"gender": gender, "no_notify": False}}, upsert=True
         )
 
     async def get_user_info(self, user_id):
         data = await self.user_info_db.find_one({"_id": user_id})
         return data or {}
 
-    async def get_broadcast_user(self, gender=None):
+    async def get_broadcast_user(self):
+        data = self.user_info_db.find()
+        return [i["_id"] for i in (await data.to_list(length=None))]
+
+    # make no sense to declare "gender" as optional arg, but who cares?
+    async def get_menu_notify_user(self, gender=None):
         data = (
-            self.user_info_db.find({"gender": gender})
+            self.user_info_db.find({"gender": gender, "no_notify": False})
             if gender
-            else self.user_info_db.find()
+            else self.user_info_db.find({"no_notify": False})
         )
         return [i["_id"] for i in (await data.to_list(length=None))]
+
+    async def no_notify(self, user_id):
+        await self.user_info_db.update_one(
+            {"_id": user_id}, {"$set": {"no_notify": True}}, upsert=True
+        )

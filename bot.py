@@ -91,7 +91,7 @@ bot.loop.run_until_complete(start_bot())
 
 
 async def broadcast(gen, txt):
-    users = await dB.get_broadcast_user(gen)
+    users = await dB.get_menu_notify_user(gen)
     for user in users:
         try:
             await bot.send_message(int(user), txt)
@@ -128,51 +128,74 @@ async def _start(e):
         ],
     )
 
+async def _tell_to_select_hostel(e, _id):
+    await e.edit(
+        f"__Sorry!__\n\n__You Haven't Selected Your Hostel Yet!__\n__Please Select Your Hostel First Then Use The Following Command!!__",
+        buttons=[
+            [
+                Button.inline("👨 BOYS HOSTEL", data=f"male_{_id}"),
+                Button.inline("👩 GIRLS HOSTEL", data=f"female_{_id}"),
+            ]
+        ],
+    )
 
 @bot.on(
     events.NewMessage(incoming=True, pattern="^/today", func=lambda e: e.is_private)
 )
 async def _today(e):
     xn = await e.reply("`Getting Menu For You.... 🔍`")
-    TODAY = await menu_today()  # to make sure that we have latest menu
-    gender_batao = (await dB.get_user_info(e.sender_id)).get("gender")
-    txt = f"**📋 Today Menu & Timing ⏰** __({
-        datetime.now(
-            pytz.timezone('Asia/Kolkata')).strftime('%d/%m/%Y')})__\n"
-    for what_is in TODAY[gender_batao].keys():
-        txt += TXT.format(
-            EMOJI[what_is],
-            what_is.title(),
-            TIMING[what_is][0],
-            TODAY[gender_batao][what_is].title(),
-        )
+    if user_data := await dB.get_user_info(e.sender_id):
+        TODAY = await menu_today()  # to make sure that we have latest menu
+        gender_batao = user_data.get("gender")
+        txt = f"**📋 Today Menu & Timing ⏰** __({
+            datetime.now(
+                pytz.timezone('Asia/Kolkata')).strftime('%d/%m/%Y')})__\n"
+        for what_is in TODAY[gender_batao].keys():
+            txt += TXT.format(
+                EMOJI[what_is],
+                what_is.title(),
+                TIMING[what_is][0],
+                TODAY[gender_batao][what_is].title(),
+            )
 
-    txt += f"\n`{random.choice(QTS)}`"
-    await xn.edit(txt)
+        txt += f"\n`{random.choice(QTS)}`"
+        return await xn.edit(txt)
+    return await _tell_to_select_hostel(xn, e.sender_id)
 
 
 @bot.on(events.NewMessage(incoming=True, pattern="^/tmrw", func=lambda e: e.is_private))
 async def _tmrw(e):
     xn = await e.reply("`Getting Menu For You.... 🔍`")
-    TMRW = await menu_today(tmrw=True)
-    gender_batao = (await dB.get_user_info(e.sender_id)).get("gender")
-    txt = f"**📋 Tomorrow Menu & Timing ⏰** __({
-        (
-            datetime.now(
-                pytz.timezone('Asia/Kolkata')) +
-            timedelta(
-                days=1)).strftime('%d/%m/%Y')})__\n"
-    for what_is in TMRW[gender_batao].keys():
-        txt += TXT.format(
-            EMOJI[what_is],
-            what_is.title(),
-            TIMING[what_is][0],
-            TMRW[gender_batao][what_is].title(),
-        )
+    if user_data := await dB.get_user_info(e.sender_id):
+        TMRW = await menu_today(tmrw=True)
+        gender_batao = user_data.get("gender")
+        txt = f"**📋 Tomorrow Menu & Timing ⏰** __({
+            (
+                datetime.now(
+                    pytz.timezone('Asia/Kolkata')) +
+                timedelta(
+                    days=1)).strftime('%d/%m/%Y')})__\n"
+        for what_is in TMRW[gender_batao].keys():
+            txt += TXT.format(
+                EMOJI[what_is],
+                what_is.title(),
+                TIMING[what_is][0],
+                TMRW[gender_batao][what_is].title(),
+            )
 
-    txt += f"\n`{random.choice(QTS)}`"
-    await xn.edit(txt)
+        txt += f"\n`{random.choice(QTS)}`"
+        return await xn.edit(txt)
+    return await _tell_to_select_hostel(xn, e.sender_id)
 
+@bot.on(events.NewMessage(incoming=True, pattern="^/stop", func=lambda e: e.is_private))
+async def _stop(e):
+    xn = await e.reply("`Processing Your Request.... 🔍`")
+    if user_data := await dB.get_user_info(e.sender_id):
+        if user_data.get("no_notify"):
+            return await xn.edit("`You Have Already Stopped The Notification! 🤡`")
+        await dB.no_notify(e.sender_id)
+        return await xn.edit("`You Will No Longer Receive Menu Notifications! 😢`")
+    return await xn.edit("`What You Want To Stop? Yourself? 🤡`")
 
 @bot.on(events.NewMessage(incoming=True, pattern="^/about"))
 async def _about(event):

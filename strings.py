@@ -41,7 +41,7 @@ QTS = [
 
 ABOUT = """
 **⏱ Uptime** : `{}`
-**💡Version** : `v0.0.1@4.09.dev`
+**💡Version** : `v0.0.1@10.09.dev`
 **👥 Users** : `{}`
 
 • **🐍 Python**: `{}`
