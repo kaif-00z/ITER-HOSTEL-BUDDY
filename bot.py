@@ -268,14 +268,14 @@ async def broadcast_bt(e):
 async def _(e):
     _id = int(e.pattern_match.group(1))
     await dB.add_broadcast_user(_id, "BOYS")
-    await e.edit("__Now You Will Recieve Notification Of Timing & Menu, wow!! ❤️‍🔥__")
+    await e.edit("__Now You Will Recieve Notification Of Timing & Menu, wow!! ❤️‍🔥__\n__To Stop Menu Reminders Use /stop Command.__")
 
 
 @bot.on(events.CallbackQuery(pattern=b"female_(.*)"))
 async def _(e):
     _id = int(e.pattern_match.group(1))
     await dB.add_broadcast_user(_id, "GIRLS")
-    await e.edit("__Now You Will Recieve Notification Of Timing & Menu, wow!! ❤️‍🔥__")
+    await e.edit("__Now You Will Recieve Notification Of Timing & Menu, wow!! ❤️‍🔥__\n__To Stop Menu Reminders Use /stop Command.__")
 
 
 # RUN
