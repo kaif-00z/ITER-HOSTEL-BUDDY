@@ -32,7 +32,7 @@ from telethon.utils import get_display_name
 from data.timing import TIMING
 from db import DataBase
 from func import run_async, ts
-from strings import ABOUT, EMOJI, QTS, TXT
+from strings import ABOUT, EMOJI, QTS, TXT, SPECIAL_SUDNAY_FOR_BH
 
 
 class Var:
@@ -83,7 +83,13 @@ def menu_today(tmrw=None):
             if tmrw
             else datetime.now(pytz.timezone("Asia/Kolkata"))
         )
-        data[key] = DATA[key]["weeks"][(dt.isocalendar()[1]) % 4]["days"][dt.weekday()]
+        if key == "BOYS":
+            data[key] = DATA[key]["days"][dt.weekday()]
+            if dt.weekday() == 6:
+                if ((dt.isocalendar()[1]) % 4) in [1, 3]:
+                    data[key] = SPECIAL_SUDNAY_FOR_BH[0]
+                else:
+                    data[key] = SPECIAL_SUDNAY_FOR_BH[1]
     return data
 
 
