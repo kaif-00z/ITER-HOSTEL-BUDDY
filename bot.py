@@ -32,7 +32,7 @@ from telethon.utils import get_display_name
 from data.timing import TIMING
 from db import DataBase
 from func import run_async, ts
-from strings import ABOUT, EMOJI, QTS, TXT, SPECIAL_SUDNAY_FOR_BH
+from strings import ABOUT, EMOJI, QTS, SPECIAL_SUDNAY_FOR_BH, TXT
 
 
 class Var:
