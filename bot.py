@@ -18,6 +18,7 @@
 
 
 import asyncio
+import calendar
 import json
 import random
 from datetime import datetime, timedelta
@@ -49,7 +50,7 @@ UPTIME = datetime.now(pytz.timezone("Asia/Kolkata"))
 # actually doesn't make any sense if deployed on restarting server (like heroku, koyeb, railway, etc)
 # but it make sense if its deployed on non restarting server
 # so that we don't need to load menu again and again :)
-DATA = {"BOYS": {}, "GIRLS": {}}
+DATA = {"BOYS": {}}
 
 # ahh, no need of try , except cause program will crash in startup if
 # something went wrong...
@@ -61,8 +62,6 @@ async def start_bot() -> None:
     print("Loading Static Menu Files....")
     async with aiofiles.open("data/W-BH 1-12.json", "r", encoding="utf-8") as f:
         DATA["BOYS"] = json.loads(await f.read())
-    async with aiofiles.open("data/W-LH 1-4.json", "r", encoding="utf-8") as f:
-        DATA["GIRLS"] = json.loads(await f.read())
     print("Successfully Loaded Static Menu Files!")
 
     await bot.start(bot_token=Var.BOT_TOKEN)
@@ -72,7 +71,7 @@ async def start_bot() -> None:
 
 @run_async  # not just dummy async
 def menu_today(tmrw=None):
-    data = {"BOYS": {}, "GIRLS": {}}
+    data = {"BOYS": {}}
     for (
         key
     ) in (
@@ -83,13 +82,17 @@ def menu_today(tmrw=None):
             if tmrw
             else datetime.now(pytz.timezone("Asia/Kolkata"))
         )
-        if key == "BOYS":
-            data[key] = DATA[key]["days"][dt.weekday()]
-            if dt.weekday() == 6:
-                if ((dt.isocalendar()[1]) % 4) in [1, 3]:
-                    data[key] = SPECIAL_SUDNAY_FOR_BH[0]
-                else:
-                    data[key] = SPECIAL_SUDNAY_FOR_BH[1]
+        data[key] = DATA[key]["days"][dt.weekday()]
+        if dt.weekday() == 6:
+            sunday_count = sum(
+                1
+                for d in range(1, dt.day + 1)
+                if calendar.weekday(dt.year, dt.month, d) == 6
+            )
+            if sunday_count in [1, 3]:
+                data[key] = SPECIAL_SUDNAY_FOR_BH[0]
+            else:
+                data[key] = SPECIAL_SUDNAY_FOR_BH[1]
     return data
 
 
@@ -129,7 +132,6 @@ async def _start(e):
         buttons=[
             [
                 Button.inline("👨 BOYS HOSTEL", data=f"male_{e.sender_id}"),
-                Button.inline("👩 GIRLS HOSTEL", data=f"female_{e.sender_id}"),
             ]
         ],
     )
@@ -141,7 +143,6 @@ async def _tell_to_select_hostel(e, _id):
         buttons=[
             [
                 Button.inline("👨 BOYS HOSTEL", data=f"male_{_id}"),
-                Button.inline("👩 GIRLS HOSTEL", data=f"female_{_id}"),
             ]
         ],
     )
@@ -274,15 +275,6 @@ async def broadcast_bt(e):
 async def _(e):
     _id = int(e.pattern_match.group(1))
     await dB.add_broadcast_user(_id, "BOYS")
-    await e.edit(
-        "__Now You Will Recieve Notification Of Timing & Menu, wow!! ❤️‍🔥__\n__To Stop Menu Reminders Use /stop Command.__"
-    )
-
-
-@bot.on(events.CallbackQuery(pattern=b"female_(.*)"))
-async def _(e):
-    _id = int(e.pattern_match.group(1))
-    await dB.add_broadcast_user(_id, "GIRLS")
     await e.edit(
         "__Now You Will Recieve Notification Of Timing & Menu, wow!! ❤️‍🔥__\n__To Stop Menu Reminders Use /stop Command.__"
     )
