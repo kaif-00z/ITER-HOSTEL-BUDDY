@@ -18,9 +18,9 @@
 
 
 import asyncio
+import calendar
 import json
 import random
-import calendar
 from datetime import datetime, timedelta
 
 import aiofiles
@@ -84,7 +84,11 @@ def menu_today(tmrw=None):
         )
         data[key] = DATA[key]["days"][dt.weekday()]
         if dt.weekday() == 6:
-            sunday_count = sum(1 for d in range(1, dt.day + 1) if calendar.weekday(dt.year, dt.month, d) == 6)
+            sunday_count = sum(
+                1
+                for d in range(1, dt.day + 1)
+                if calendar.weekday(dt.year, dt.month, d) == 6
+            )
             if sunday_count in [1, 3]:
                 data[key] = SPECIAL_SUDNAY_FOR_BH[0]
             else:
@@ -274,6 +278,7 @@ async def _(e):
     await e.edit(
         "__Now You Will Recieve Notification Of Timing & Menu, wow!! ❤️‍🔥__\n__To Stop Menu Reminders Use /stop Command.__"
     )
+
 
 # RUN
 # some times cron skip, can't do anything or maybe we can?
